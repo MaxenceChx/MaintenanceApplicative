@@ -4,6 +4,7 @@ class GildedRose {
     public static final String AGED_BRIE = "Aged Brie";
     public static final String SULFURAS = "Sulfuras, Hand of Ragnaros";
     public static final String BACKSTAGE_PASSES = "Backstage passes to a TAFKAL80ETC concert";
+    public static final String CONJURED = "Conjured";
 
     Item[] items;
 
@@ -34,6 +35,10 @@ class GildedRose {
                     int increase = (item.sellIn < 5) ? 3 : (item.sellIn < 10) ? 2 : 1;
                     increaseQuality(item, increase);
                 }
+                break;
+
+            case CONJURED:
+                decreaseQuality(item, (item.sellIn >= 0) ? 2 : 4);
                 break;
     
             default:

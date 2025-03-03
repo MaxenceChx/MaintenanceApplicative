@@ -148,4 +148,22 @@ class GildedRoseTest {
         assertEquals(0, app.items[0].quality);
         assertEquals(-1, app.items[0].sellIn);
     }
+
+    @Test
+    void testUpdateConjuredItemQuality() {
+        Item[] items = new Item[] { new Item(GildedRose.CONJURED, 1, 10) };
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(8, app.items[0].quality);
+        assertEquals(0, app.items[0].sellIn);
+    }
+
+    @Test
+    void testUpdatePassedConjuredItemQuality() {
+        Item[] items = new Item[] { new Item(GildedRose.CONJURED, -1, 4) };
+        GildedRose app = new GildedRose(items);
+        app.updateQuality();
+        assertEquals(0, app.items[0].quality);
+        assertEquals(-2, app.items[0].sellIn);
+    }
 }
