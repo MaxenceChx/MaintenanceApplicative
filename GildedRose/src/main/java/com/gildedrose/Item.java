@@ -18,4 +18,9 @@ public class Item {
    public String toString() {
         return this.name + ", " + this.sellIn + ", " + this.quality;
     }
+
+    public void updateItem() {
+        this.quality = Math.max(0, this.quality - (this.sellIn >= 0 ? 1 : 2));
+        this.sellIn -= 1;
+    }
 }
