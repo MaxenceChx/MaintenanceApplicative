@@ -25,6 +25,8 @@ public class Game implements IGame {
       "Rock", rockQuestions
    );
 
+   private String[] categories = {"Pop", "Science", "Sports", "Rock"};
+
    int currentPlayer = 0;
    boolean isGettingOutOfPenaltyBox;
 
@@ -99,20 +101,12 @@ public class Game implements IGame {
    private void askQuestion() {
       String category = currentCategory();
       System.out.println(questionMap.get(category).removeFirst());
-  }
+   }
 
 
    private String currentCategory() {
-      if (places[currentPlayer] - 1 == 0) return "Pop";
-      if (places[currentPlayer] - 1 == 4) return "Pop";
-      if (places[currentPlayer] - 1 == 8) return "Pop";
-      if (places[currentPlayer] - 1 == 1) return "Science";
-      if (places[currentPlayer] - 1 == 5) return "Science";
-      if (places[currentPlayer] - 1 == 9) return "Science";
-      if (places[currentPlayer] - 1 == 2) return "Sports";
-      if (places[currentPlayer] - 1 == 6) return "Sports";
-      if (places[currentPlayer] - 1 == 10) return "Sports";
-      return "Rock";
+      int position = places[currentPlayer] - 1;
+      return categories[position % 4];
    }
 
    public boolean handleCorrectAnswer() {
