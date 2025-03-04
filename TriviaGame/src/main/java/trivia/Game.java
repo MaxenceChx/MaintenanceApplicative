@@ -31,17 +31,18 @@ public class Game implements IGame {
    boolean isGettingOutOfPenaltyBox;
 
    public Game() {
+      initializeQuestions();
+  }
+  
+  private void initializeQuestions() {
       for (int i = 0; i < 50; i++) {
-         popQuestions.addLast("Pop Question " + i);
-         scienceQuestions.addLast(("Science Question " + i));
-         sportsQuestions.addLast(("Sports Question " + i));
-         rockQuestions.addLast(createRockQuestion(i));
+          final int questionNumber = i;
+          questionMap.forEach((category, questions) -> {
+              String questionText = category + " Question " + questionNumber;
+              questions.addLast(questionText);
+          });
       }
-   }
-
-   public String createRockQuestion(int index) {
-      return "Rock Question " + index;
-   }
+  }
 
    public boolean isPlayable() {
       return (howManyPlayers() >= 2);
