@@ -109,51 +109,34 @@ public class Game implements IGame {
    }
 
    public boolean handleCorrectAnswer() {
-      if (inPenaltyBox[currentPlayer]) {
-         if (isGettingOutOfPenaltyBox) {
-            System.out.println("Answer was correct!!!!");
-            purses[currentPlayer]++;
-            System.out.println(players.get(currentPlayer)
-                               + " now has "
-                               + purses[currentPlayer]
-                               + " Gold Coins.");
-
-            boolean winner = didPlayerWin();
-            currentPlayer++;
-            if (currentPlayer == players.size()) currentPlayer = 0;
-
-            return winner;
-         } else {
-            currentPlayer++;
-            if (currentPlayer == players.size()) currentPlayer = 0;
-            return true;
-         }
-
-
-      } else {
-
-         System.out.println("Answer was correct!!!!");
-         purses[currentPlayer]++;
-         System.out.println(players.get(currentPlayer)
-                            + " now has "
-                            + purses[currentPlayer]
-                            + " Gold Coins.");
-
-         boolean winner = didPlayerWin();
-         currentPlayer++;
-         if (currentPlayer == players.size()) currentPlayer = 0;
-
-         return winner;
+      // Si le joueur est dans la penalty box mais ne peut pas en sortir
+      if (inPenaltyBox[currentPlayer] && !isGettingOutOfPenaltyBox) {
+          moveToNextPlayer();
+          return true;
       }
+      
+      // Cas où le joueur n'est pas dans la penalty box
+      // OU est dans la penalty box mais peut en sortir
+      System.out.println("Answer was correct!!!!");
+      purses[currentPlayer]++;
+      System.out.println(players.get(currentPlayer) + " now has " + 
+                        purses[currentPlayer] + " Gold Coins.");
+  
+      boolean winner = didPlayerWin();
+      moveToNextPlayer();
+      return winner;
+   }
+   
+   private void moveToNextPlayer() {
+      currentPlayer = (currentPlayer + 1) % players.size();
    }
 
    public boolean wrongAnswer() {
       System.out.println("Question was incorrectly answered");
       System.out.println(players.get(currentPlayer) + " was sent to the penalty box");
       inPenaltyBox[currentPlayer] = true;
-
-      currentPlayer++;
-      if (currentPlayer == players.size()) currentPlayer = 0;
+  
+      moveToNextPlayer();
       return true;
    }
 
