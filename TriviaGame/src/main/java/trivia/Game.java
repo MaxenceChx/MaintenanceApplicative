@@ -4,18 +4,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
-import java.util.Queue;
 
-// REFACTOR ME
 public class Game implements IGame {
-   ArrayList<String> players = new ArrayList<>();
-   int[] places = new int[6];
-   int[] purses = new int[6];
-   boolean[] inPenaltyBox = new boolean[6];
+   // Constantes
+   private static final int MAX_PLAYERS = 6;
+   private static final int BOARD_SIZE = 12;
+   private static final int WINNING_COINS = 6;
+   private static final int QUESTIONS_PER_CATEGORY = 50;
+   private static final String[] CATEGORIES = {"Pop", "Science", "Sports", "Rock"};
 
-   private final String[] CATEGORIES = {"Pop", "Science", "Sports", "Rock"};
+   // État du jeu
+   private final ArrayList<String> players = new ArrayList<>();
+   private final int[] places = new int[MAX_PLAYERS];
+   private final int[] purses = new int[MAX_PLAYERS];
+   private final boolean[] inPenaltyBox = new boolean[MAX_PLAYERS];
 
-   private final Map<String, LinkedList<String>> questionMap = initializeQuestionMap();
+   // Questions par catégorie
+   private final Map<String, LinkedList<String>> questionMap;
+
+   // État du tour actuel
+   private int currentPlayer = 0;
+   private boolean isGettingOutOfPenaltyBox;
+
+   public Game() {
+      questionMap = initializeQuestionMap();
+      initializeQuestions();
+   }
 
    private Map<String, LinkedList<String>> initializeQuestionMap() {
       Map<String, LinkedList<String>> map = new HashMap<>();
@@ -25,15 +39,8 @@ public class Game implements IGame {
       return map;
    }
 
-   int currentPlayer = 0;
-   boolean isGettingOutOfPenaltyBox;
-
-   public Game() {
-      initializeQuestions();
-   }
-  
    private void initializeQuestions() {
-      for (int i = 0; i < 50; i++) {
+      for (int i = 0; i < QUESTIONS_PER_CATEGORY; i++) {
          final int questionNumber = i;
          questionMap.forEach((category, questions) -> {
             String questionText = category + " Question " + questionNumber;
@@ -43,14 +50,20 @@ public class Game implements IGame {
    }
 
    public boolean isPlayable() {
-      return (howManyPlayers() >= 2);
+      return howManyPlayers() >= 2;
    }
 
    public boolean add(String playerName) {
-      places[howManyPlayers()] = 1;
-      purses[howManyPlayers()] = 0;
-      inPenaltyBox[howManyPlayers()] = false;
+      if (howManyPlayers() >= MAX_PLAYERS) {
+         System.out.println("Cannot add more than " + MAX_PLAYERS + " players");
+         return false;
+      }
+        
       players.add(playerName);
+      int playerIndex = howManyPlayers() - 1;
+      places[playerIndex] = 1;  // Position initiale
+      purses[playerIndex] = 0;  // Pas de pièces au début
+      inPenaltyBox[playerIndex] = false;  // Pas dans la penalty box au début
 
       System.out.println(playerName + " was added");
       System.out.println("They are player number " + players.size());
@@ -78,7 +91,7 @@ public class Game implements IGame {
    private void handlePenaltyBoxRoll(int roll) {
       boolean isOdd = roll % 2 != 0;
       isGettingOutOfPenaltyBox = isOdd;
-      
+        
       if (isOdd) {
          System.out.println(players.get(currentPlayer) + " is getting out of the penalty box");
          movePlayerPosition(roll);
@@ -91,10 +104,7 @@ public class Game implements IGame {
    }
   
    private void movePlayerPosition(int roll) {
-      places[currentPlayer] = (places[currentPlayer] + roll) % 12;
-      if (places[currentPlayer] == 0) {
-         places[currentPlayer] = 12;
-      }
+      places[currentPlayer] = (places[currentPlayer] + roll - 1) % BOARD_SIZE + 1;
    }
   
    private void announcePositionAndCategory() {
@@ -104,34 +114,37 @@ public class Game implements IGame {
 
    private void askQuestion() {
       String category = currentCategory();
-      System.out.println(questionMap.get(category).removeFirst());
+      LinkedList<String> questions = questionMap.get(category);
+      if (questions.isEmpty()) {
+         System.out.println("No more " + category + " questions!");
+      } else {
+         System.out.println(questions.removeFirst());
+      }
    }
-
 
    private String currentCategory() {
       int position = places[currentPlayer] - 1;
-      return CATEGORIES[position % 4];
+      return CATEGORIES[position % CATEGORIES.length];
    }
 
    public boolean handleCorrectAnswer() {
-      // Si le joueur est dans la penalty box mais ne peut pas en sortir
       if (inPenaltyBox[currentPlayer] && !isGettingOutOfPenaltyBox) {
          moveToNextPlayer();
          return true;
       }
-      
-      // Cas où le joueur n'est pas dans la penalty box
-      // OU est dans la penalty box mais peut en sortir
+        
       System.out.println("Answer was correct!!!!");
       purses[currentPlayer]++;
-      System.out.println(players.get(currentPlayer) + " now has " + 
-                        purses[currentPlayer] + " Gold Coins.");
+        
+      String playerName = players.get(currentPlayer);
+      int coins = purses[currentPlayer];
+      System.out.println(playerName + " now has " + coins + " Gold Coins.");
   
       boolean winner = didPlayerWin();
       moveToNextPlayer();
       return winner;
    }
-   
+
    private void moveToNextPlayer() {
       currentPlayer = (currentPlayer + 1) % players.size();
    }
@@ -145,8 +158,7 @@ public class Game implements IGame {
       return true;
    }
 
-
    private boolean didPlayerWin() {
-      return !(purses[currentPlayer] == 6);
+      return purses[currentPlayer] != WINNING_COINS;
    }
 }
