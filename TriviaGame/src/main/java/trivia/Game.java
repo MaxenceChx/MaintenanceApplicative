@@ -86,6 +86,7 @@ public class Game implements IGame {
          askQuestion();
       } else {
          System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
+         moveToNextPlayer();
       }
    }
   

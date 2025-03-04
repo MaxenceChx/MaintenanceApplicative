@@ -71,6 +71,8 @@ public class GameOld implements IGame {
          } else {
             System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
             isGettingOutOfPenaltyBox = false;
+            currentPlayer++;
+            if (currentPlayer == players.size()) currentPlayer = 0;
          }
 
       } else {
