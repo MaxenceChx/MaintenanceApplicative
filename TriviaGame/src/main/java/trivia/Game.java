@@ -34,11 +34,11 @@ public class Game implements IGame {
   
    private void initializeQuestions() {
       for (int i = 0; i < 50; i++) {
-          final int questionNumber = i;
-          questionMap.forEach((category, questions) -> {
-              String questionText = category + " Question " + questionNumber;
-              questions.addLast(questionText);
-          });
+         final int questionNumber = i;
+         questionMap.forEach((category, questions) -> {
+            String questionText = category + " Question " + questionNumber;
+            questions.addLast(questionText);
+         });
       }
    }
 
@@ -115,8 +115,8 @@ public class Game implements IGame {
    public boolean handleCorrectAnswer() {
       // Si le joueur est dans la penalty box mais ne peut pas en sortir
       if (inPenaltyBox[currentPlayer] && !isGettingOutOfPenaltyBox) {
-          moveToNextPlayer();
-          return true;
+         moveToNextPlayer();
+         return true;
       }
       
       // Cas où le joueur n'est pas dans la penalty box
