@@ -62,39 +62,43 @@ public class Game implements IGame {
    }
 
    public void roll(int roll) {
-      System.out.println(players.get(currentPlayer) + " is the current player");
+      String playerName = players.get(currentPlayer);
+      System.out.println(playerName + " is the current player");
       System.out.println("They have rolled a " + roll);
-
+  
       if (inPenaltyBox[currentPlayer]) {
-         if (roll % 2 != 0) {
-            isGettingOutOfPenaltyBox = true;
-
-            System.out.println(players.get(currentPlayer) + " is getting out of the penalty box");
-            places[currentPlayer] = places[currentPlayer] + roll;
-            if (places[currentPlayer] > 12) places[currentPlayer] = places[currentPlayer] - 12;
-
-            System.out.println(players.get(currentPlayer)
-                               + "'s new location is "
-                               + places[currentPlayer]);
-            System.out.println("The category is " + currentCategory());
-            askQuestion();
-         } else {
-            System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
-            isGettingOutOfPenaltyBox = false;
-         }
-
+         handlePenaltyBoxRoll(roll);
       } else {
-
-         places[currentPlayer] = places[currentPlayer] + roll;
-         if (places[currentPlayer] > 12) places[currentPlayer] = places[currentPlayer] - 12;
-
-         System.out.println(players.get(currentPlayer)
-                            + "'s new location is "
-                            + places[currentPlayer]);
-         System.out.println("The category is " + currentCategory());
+         movePlayerPosition(roll);
+         announcePositionAndCategory();
          askQuestion();
       }
-
+   }
+  
+   private void handlePenaltyBoxRoll(int roll) {
+      boolean isOdd = roll % 2 != 0;
+      isGettingOutOfPenaltyBox = isOdd;
+      
+      if (isOdd) {
+         System.out.println(players.get(currentPlayer) + " is getting out of the penalty box");
+         movePlayerPosition(roll);
+         announcePositionAndCategory();
+         askQuestion();
+      } else {
+         System.out.println(players.get(currentPlayer) + " is not getting out of the penalty box");
+      }
+   }
+  
+   private void movePlayerPosition(int roll) {
+      places[currentPlayer] = (places[currentPlayer] + roll) % 12;
+      if (places[currentPlayer] == 0) {
+         places[currentPlayer] = 12;
+      }
+   }
+  
+   private void announcePositionAndCategory() {
+      System.out.println(players.get(currentPlayer) + "'s new location is " + places[currentPlayer]);
+      System.out.println("The category is " + currentCategory());
    }
 
    private void askQuestion() {
