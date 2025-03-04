@@ -13,28 +13,26 @@ public class Game implements IGame {
    int[] purses = new int[6];
    boolean[] inPenaltyBox = new boolean[6];
 
-   LinkedList<String> popQuestions = new LinkedList<>();
-   LinkedList<String> scienceQuestions = new LinkedList<>();
-   LinkedList<String> sportsQuestions = new LinkedList<>();
-   LinkedList<String> rockQuestions = new LinkedList<>();
+   private final String[] CATEGORIES = {"Pop", "Science", "Sports", "Rock"};
 
-   private Map<String, LinkedList<String>> questionMap = Map.of(
-      "Pop", popQuestions,
-      "Science", scienceQuestions,
-      "Sports", sportsQuestions,
-      "Rock", rockQuestions
-   );
+   private final Map<String, LinkedList<String>> questionMap = initializeQuestionMap();
 
-   private String[] categories = {"Pop", "Science", "Sports", "Rock"};
+   private Map<String, LinkedList<String>> initializeQuestionMap() {
+      Map<String, LinkedList<String>> map = new HashMap<>();
+      for (String category : CATEGORIES) {
+         map.put(category, new LinkedList<>());
+      }
+      return map;
+   }
 
    int currentPlayer = 0;
    boolean isGettingOutOfPenaltyBox;
 
    public Game() {
       initializeQuestions();
-  }
+   }
   
-  private void initializeQuestions() {
+   private void initializeQuestions() {
       for (int i = 0; i < 50; i++) {
           final int questionNumber = i;
           questionMap.forEach((category, questions) -> {
@@ -42,7 +40,7 @@ public class Game implements IGame {
               questions.addLast(questionText);
           });
       }
-  }
+   }
 
    public boolean isPlayable() {
       return (howManyPlayers() >= 2);
@@ -107,7 +105,7 @@ public class Game implements IGame {
 
    private String currentCategory() {
       int position = places[currentPlayer] - 1;
-      return categories[position % 4];
+      return CATEGORIES[position % 4];
    }
 
    public boolean handleCorrectAnswer() {
