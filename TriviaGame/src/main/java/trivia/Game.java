@@ -1,11 +1,8 @@
 package trivia;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.*;
 
 public class Game implements IGame {
     // Constantes
@@ -13,14 +10,18 @@ public class Game implements IGame {
     private static final int BOARD_SIZE = 12;
     private static final int WINNING_COINS = 6;
     private static final int QUESTIONS_PER_CATEGORY = 50;
+    private static final int STREAK_THRESHOLD = 3; // Nombre de bonnes réponses consécutives pour commencer une série
 
     // État du jeu
     private final List<Player> players = new ArrayList<>();
     private final Map<Categories, Queue<String>> questionMap = new HashMap<>();
+    private boolean gameStarted = false;
 
     // État du tour actuel
     private int currentPlayerIndex = 0;
     private boolean isGettingOutOfPenaltyBox;
+    private boolean secondChanceActive = false; // Indique si le joueur a droit à une seconde chance
+    private Categories lastCategory = null; // Stocke la dernière catégorie pour la seconde chance
 
     /**
      * Constructeur de la classe Game.
@@ -30,16 +31,72 @@ public class Game implements IGame {
     }
 
     /**
-     * Initialise les questions pour chaque catégorie.
+     * Initialise les questions du jeu.
      */
     private void initializeQuestions() {
         for (Categories category : Categories.values()) {
-            Queue<String> questions = new LinkedList<>();
-            for (int i = 0; i < QUESTIONS_PER_CATEGORY; i++) {
-                questions.add(category + " Question " + i);
-            }
+            Queue<String> questions = loadQuestionsFromFile(category);
             questionMap.put(category, questions);
         }
+    }
+
+    /**
+     * Charge les questions d'une catégorie à partir d'un fichier.
+     * @param category la catégorie des questions à charger.
+     * @return une file de questions.
+     */
+    private Queue<String> loadQuestionsFromFile(Categories category) {
+        Queue<String> questions = new LinkedList<>();
+        String filename = category.getFilename();
+        Properties properties = new Properties();
+        
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream(filename)) {
+            // If file doesn't exist, fall back to generated questions
+            if (input == null) {
+                System.out.println("Unable to find " + filename + ". Using generated questions instead.");
+                return generateDefaultQuestions(category);
+            }
+            
+            properties.load(input);
+            
+            // Load questions from properties file
+            for (int i = 1; i <= QUESTIONS_PER_CATEGORY; i++) {
+                String question = properties.getProperty("question." + i);
+                if (question != null) {
+                    questions.add(question);
+                }
+            }
+            
+            System.out.println("Loaded " + questions.size() + " " + category + " questions from " + filename);
+            
+            // If we didn't get enough questions, add generated ones to reach the desired count
+            if (questions.size() < QUESTIONS_PER_CATEGORY) {
+                int remaining = QUESTIONS_PER_CATEGORY - questions.size();
+                System.out.println("Adding " + remaining + " generated " + category + " questions");
+                for (int i = questions.size() + 1; i <= QUESTIONS_PER_CATEGORY; i++) {
+                    questions.add(category + " Question " + i);
+                }
+            }
+            
+        } catch (IOException e) {
+            System.out.println("Error reading " + filename + ": " + e.getMessage());
+            return generateDefaultQuestions(category);
+        }
+        
+        return questions;
+    }
+
+    /**
+     * Génère des questions par défaut pour une catégorie.
+     * @param category la catégorie des questions à générer.
+     * @return une file de questions.
+     */
+    private Queue<String> generateDefaultQuestions(Categories category) {
+        Queue<String> questions = new LinkedList<>();
+        for (int i = 0; i < QUESTIONS_PER_CATEGORY; i++) {
+            questions.add(category + " Question " + i);
+        }
+        return questions;
     }
 
     /**
@@ -56,9 +113,19 @@ public class Game implements IGame {
      * @return true si le joueur a été ajouté, false sinon.
      */
     public boolean add(String playerName) {
+        if (gameStarted) {
+            System.out.println("Cannot add new players after the game has started.");
+            return false;
+        }
         if (players.size() >= MAX_PLAYERS) {
             System.out.println("Cannot add more than " + MAX_PLAYERS + " players");
             return false;
+        }
+        for (Player player : players) {
+            if (player.getName().equals(playerName)) {
+                System.out.println("A player with this name already exists.");
+                return false;
+            }
         }
         players.add(new Player(playerName));
         System.out.println(playerName + " was added");
@@ -67,10 +134,27 @@ public class Game implements IGame {
     }
 
     /**
+     * Démarre le jeu.
+     */
+    public boolean startGame() {
+        if (players.size() < 2) {
+            System.out.println("At least two players are required to start the game.");
+            return false;
+        }
+        gameStarted = true;
+        System.out.println("Game has started!");
+        return true;
+    }
+
+    /**
      * Lance un tour de jeu.
      * @param roll le résultat du lancer de dé.
      */
     public void roll(int roll) {
+        if (!gameStarted && !startGame()) {
+            return;
+        }
+
         Player currentPlayer = players.get(currentPlayerIndex);
         System.out.println(currentPlayer.getName() + " is the current player");
         System.out.println("They have rolled a " + roll);
@@ -79,6 +163,7 @@ public class Game implements IGame {
             handlePenaltyBoxRoll(currentPlayer, roll);
         } else {
             movePlayerPosition(currentPlayer, roll);
+            lastCategory = currentCategory();  // Stocke la catégorie actuelle pour la seconde chance
             askQuestion();
         }
     }
@@ -93,6 +178,7 @@ public class Game implements IGame {
         if (isGettingOutOfPenaltyBox) {
             System.out.println(player.getName() + " is getting out of the penalty box");
             movePlayerPosition(player, roll);
+            lastCategory = currentCategory();  // Stocke la catégorie actuelle pour la seconde chance
             askQuestion();
         } else {
             System.out.println(player.getName() + " is not getting out of the penalty box");
@@ -125,6 +211,19 @@ public class Game implements IGame {
     }
 
     /**
+     * Pose une question de seconde chance dans la même catégorie.
+     */
+    private void askSecondChanceQuestion() {
+        Queue<String> questions = questionMap.get(lastCategory);
+        if (questions.isEmpty()) {
+            System.out.println("No more " + lastCategory + " questions for second chance!");
+        } else {
+            System.out.println("Second chance question in " + lastCategory + " category:");
+            System.out.println(questions.poll());
+        }
+    }
+
+    /**
      * Retourne la catégorie actuelle.
      * @return la catégorie actuelle.
      */
@@ -142,12 +241,39 @@ public class Game implements IGame {
             moveToNextPlayer();
             return true;
         }
+
         System.out.println("Answer was correct!!!!");
-        currentPlayer.addCoin();
+        
+        // Réinitialise la seconde chance si elle était active
+        secondChanceActive = false;
+        
+        // Gestion des séries et attribution des points
+        currentPlayer.incrementCorrectAnswers();
+        int consecutiveCorrectAnswers = currentPlayer.getConsecutiveCorrectAnswers();
+
+        int points = 1;
+        if (consecutiveCorrectAnswers > STREAK_THRESHOLD) {
+            points = 2;
+            System.out.println(currentPlayer.getName() + " is on a streak! Double points awarded!");
+        }
+        
+        // Ajoute les points
+        currentPlayer.addCoins(points);
         System.out.println(currentPlayer.getName() + " now has " + currentPlayer.getCoins() + " Gold Coins.");
-        boolean winner = !currentPlayer.hasWon(WINNING_COINS);
-        moveToNextPlayer();
-        return winner;
+        
+        // Vérifie si le joueur a gagné (doit avoir un nombre pair de pièces si > WINNING_COINS)
+        boolean winner = currentPlayer.hasWon(WINNING_COINS);
+        boolean gameEnds = winner;
+        
+        if (winner) {
+            System.out.println(currentPlayer.getName() + " has won the game!");
+        }
+        
+        if (!gameEnds) {
+            moveToNextPlayer();
+        }
+        
+        return !gameEnds;
     }
 
     /**
@@ -157,8 +283,33 @@ public class Game implements IGame {
     public boolean wrongAnswer() {
         Player currentPlayer = players.get(currentPlayerIndex);
         System.out.println("Question was incorrectly answered");
+
+        // Si la seconde chance n'est pas encore active, l'activer
+        if (!secondChanceActive) {
+            System.out.println(currentPlayer.getName() + " gets a second chance in the " + lastCategory + " category");
+            secondChanceActive = true;
+            System.out.println(currentPlayer.getName() + " lost their streak!");
+            currentPlayer.resetConsecutiveCorrectAnswers();
+            askSecondChanceQuestion();
+            return true;
+        }
+        
+        // Vérifie si le joueur est en série, si oui, il perd juste sa série
+        if (currentPlayer.getConsecutiveCorrectAnswers() >= STREAK_THRESHOLD) {
+            System.out.println(currentPlayer.getName() + " lost their streak!");
+            currentPlayer.resetConsecutiveCorrectAnswers();
+            moveToNextPlayer();
+            return true;
+        }
+
+        // Réinitialise le compteur de réponses correctes consécutives
+        currentPlayer.resetConsecutiveCorrectAnswers();
+        
+        // Si la seconde chance était déjà active et que le joueur a encore échoué
+        System.out.println(currentPlayer.getName() + " failed their second chance");
         System.out.println(currentPlayer.getName() + " was sent to the penalty box");
         currentPlayer.setInPenaltyBox(true);
+        secondChanceActive = false;  // Réinitialise la seconde chance
         moveToNextPlayer();
         return true;
     }
