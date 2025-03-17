@@ -4,6 +4,7 @@ import com.mycalendar.evenements.*;
 import com.mycalendar.valueobjects.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -78,43 +79,44 @@ public class CalendarManager {
     }
     
     /**
-     * Méthode de compatibilité pour ajouter un événement au calendrier
+     * Supprime un événement par son identifiant
      * 
-     * @param typeStr Type d'événement (chaîne)
-     * @param title Titre de l'événement
-     * @param proprietaire Utilisateur propriétaire (déjà authentifié)
-     * @param dateDebut Date et heure de début
-     * @param dureeMinutes Durée en minutes
-     * @param lieu Lieu de l'événement
-     * @param participants Participants séparés par des virgules
-     * @param frequenceJours Fréquence en jours
+     * @param eventId Identifiant de l'événement à supprimer
+     * @return true si l'événement a été supprimé, false s'il n'a pas été trouvé
      */
-    public void ajouterEvent(String typeStr, String title, Utilisateur proprietaire, LocalDateTime dateDebut, int dureeMinutes,
-                           String lieu, String participants, int frequenceJours) {
-        Evenement evenement = EvenementFactory.creerEvenement(
-            typeStr, title, proprietaire, dateDebut, dureeMinutes, lieu, participants, frequenceJours
-        );
-        ajouterEvenement(evenement);
+    public boolean supprimerEvenement(EventId eventId) {
+        if (eventId == null) {
+            return false;
+        }
+        
+        Iterator<Evenement> iterator = evenements.iterator();
+        while (iterator.hasNext()) {
+            Evenement evenement = iterator.next();
+            if (evenement.getId().equals(eventId)) {
+                iterator.remove();
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
-     * Méthode de compatibilité pour ajouter un événement au calendrier
+     * Supprime tous les événements d'un utilisateur
      * 
-     * @param typeStr Type d'événement (chaîne)
-     * @param title Titre de l'événement
-     * @param proprietaireStr Identifiant du propriétaire (chaîne)
-     * @param dateDebut Date et heure de début
-     * @param dureeMinutes Durée en minutes
-     * @param lieu Lieu de l'événement
-     * @param participants Participants séparés par des virgules
-     * @param frequenceJours Fréquence en jours
+     * @param utilisateur L'utilisateur dont on veut supprimer les événements
+     * @return Le nombre d'événements supprimés
      */
-    public void ajouterEvent(String typeStr, String title, String proprietaireStr, LocalDateTime dateDebut, int dureeMinutes,
-                            String lieu, String participants, int frequenceJours) {
-        Evenement evenement = EvenementFactory.creerEvenement(
-            typeStr, title, proprietaireStr, dateDebut, dureeMinutes, lieu, participants, frequenceJours
-        );
-        ajouterEvenement(evenement);
+    public int supprimerEvenementsUtilisateur(Utilisateur utilisateur) {
+        if (utilisateur == null) {
+            return 0;
+        }
+        
+        int countBefore = evenements.size();
+        
+        evenements.removeIf(e -> e.getProprietaire().equals(utilisateur));
+        
+        return countBefore - evenements.size();
     }
 
     /**

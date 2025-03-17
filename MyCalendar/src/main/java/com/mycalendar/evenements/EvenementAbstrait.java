@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
  */
 public abstract class EvenementAbstrait implements Evenement {
     
+    private final EventId id;
     private final TitreEvenement titre;
     private final Utilisateur proprietaire;
     private final DateEvenement date;
@@ -20,6 +21,7 @@ public abstract class EvenementAbstrait implements Evenement {
     /**
      * Constructeur pour un événement abstrait
      * 
+     * @param id Identifiant unique de l'événement
      * @param titre Titre de l'événement
      * @param proprietaire Propriétaire de l'événement
      * @param date Date de l'événement
@@ -29,9 +31,10 @@ public abstract class EvenementAbstrait implements Evenement {
      * @param participants Participants à l'événement
      * @param frequence Fréquence de l'événement
      */
-    protected EvenementAbstrait(TitreEvenement titre, Utilisateur proprietaire,
+    protected EvenementAbstrait(EventId id, TitreEvenement titre, Utilisateur proprietaire,
                               DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
                               LieuEvenement lieu, ParticipantsEvenement participants, FrequenceEvenement frequence) {
+        this.id = (id != null) ? id : EventId.generate();
         this.titre = titre;
         this.proprietaire = proprietaire;
         this.date = date;
@@ -40,6 +43,11 @@ public abstract class EvenementAbstrait implements Evenement {
         this.lieu = lieu;
         this.participants = participants;
         this.frequence = frequence;
+    }
+    
+    @Override
+    public EventId getId() {
+        return id;
     }
     
     @Override

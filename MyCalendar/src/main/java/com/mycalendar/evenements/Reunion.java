@@ -11,7 +11,35 @@ import java.util.List;
 public class Reunion extends EvenementAbstrait {
     
     /**
-     * Constructeur pour une réunion
+     * Constructeur pour une réunion avec un identifiant spécifique
+     * 
+     * @param id Identifiant unique de la réunion
+     * @param titre Titre de la réunion
+     * @param proprietaire Propriétaire de la réunion
+     * @param date Date de la réunion
+     * @param heureDebut Heure de début
+     * @param duree Durée de la réunion
+     * @param lieu Lieu de la réunion
+     * @param participants Participants à la réunion
+     */
+    public Reunion(EventId id, TitreEvenement titre, Utilisateur proprietaire,
+                 DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
+                 LieuEvenement lieu, ParticipantsEvenement participants) {
+        super(
+            id, 
+            titre, 
+            proprietaire, 
+            date, 
+            heureDebut, 
+            duree, 
+            lieu, 
+            assurerProprietaireInclus(participants, proprietaire), 
+            FrequenceEvenement.NON_PERIODIQUE // Une réunion n'est pas périodique
+        );
+    }
+    
+    /**
+     * Constructeur pour une réunion avec un identifiant généré automatiquement
      * 
      * @param titre Titre de la réunion
      * @param proprietaire Propriétaire de la réunion
@@ -24,16 +52,7 @@ public class Reunion extends EvenementAbstrait {
     public Reunion(TitreEvenement titre, Utilisateur proprietaire,
                  DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
                  LieuEvenement lieu, ParticipantsEvenement participants) {
-        super(
-            titre, 
-            proprietaire, 
-            date, 
-            heureDebut, 
-            duree, 
-            lieu, 
-            assurerProprietaireInclus(participants, proprietaire), 
-            FrequenceEvenement.NON_PERIODIQUE // Une réunion n'est pas périodique
-        );
+        this(EventId.generate(), titre, proprietaire, date, heureDebut, duree, lieu, participants);
     }
     
     /**

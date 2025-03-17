@@ -9,6 +9,13 @@ import java.time.LocalDateTime;
 public interface Evenement {
     
     /**
+     * Obtient l'identifiant unique de l'événement
+     * 
+     * @return Identifiant de l'événement
+     */
+    EventId getId();
+    
+    /**
      * Obtient le type de l'événement
      * 
      * @return Type d'événement
