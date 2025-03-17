@@ -160,7 +160,7 @@ public class CalendarManager {
     }
     
     /**
-     * Filtre les événements par propriétaire
+     * Filtre les événements dont l'utilisateur est propriétaire
      * 
      * @param utilisateur Utilisateur propriétaire des événements à rechercher
      * @return Liste des événements appartenant à l'utilisateur
@@ -169,5 +169,65 @@ public class CalendarManager {
         return evenements.stream()
                 .filter(e -> e.getProprietaire().equals(utilisateur))
                 .collect(Collectors.toList());
+    }
+    
+    /**
+     * Obtient l'agenda personnel d'un utilisateur
+     * Inclut les événements dont l'utilisateur est propriétaire ou participant
+     * 
+     * @param utilisateur L'utilisateur dont on veut l'agenda
+     * @return Liste des événements où l'utilisateur est impliqué
+     */
+    public List<Evenement> agendaPersonnel(Utilisateur utilisateur) {
+        return evenements.stream()
+                .filter(e -> estImplique(e, utilisateur))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Obtient l'agenda personnel d'un utilisateur pour une période donnée
+     * 
+     * @param utilisateur L'utilisateur dont on veut l'agenda
+     * @param dateDebut Date de début de la période
+     * @param dateFin Date de fin de la période
+     * @return Liste des événements où l'utilisateur est impliqué dans la période
+     */
+    public List<Evenement> agendaPersonnelPeriode(Utilisateur utilisateur, DateEvenement dateDebut, DateEvenement dateFin) {
+        LocalDateTime debut = LocalDateTime.of(
+            dateDebut.getAnnee(), dateDebut.getMois(), dateDebut.getJour(), 0, 0
+        );
+        
+        LocalDateTime fin = LocalDateTime.of(
+            dateFin.getAnnee(), dateFin.getMois(), dateFin.getJour(), 23, 59, 59
+        );
+        
+        return evenements.stream()
+                .filter(e -> estImplique(e, utilisateur))
+                .filter(e -> e.aLieuPendant(debut, fin))
+                .collect(Collectors.toList());
+    }
+    
+    /**
+     * Détermine si un utilisateur est impliqué dans un événement
+     * (en tant que propriétaire ou participant)
+     * 
+     * @param evenement L'événement à vérifier
+     * @param utilisateur L'utilisateur dont on vérifie l'implication
+     * @return true si l'utilisateur est impliqué, false sinon
+     */
+    private boolean estImplique(Evenement evenement, Utilisateur utilisateur) {
+        // L'utilisateur est le propriétaire
+        if (evenement.getProprietaire().equals(utilisateur)) {
+            return true;
+        }
+        
+        // Pour une réunion, vérifier si l'utilisateur est dans les participants
+        if (evenement instanceof Reunion) {
+            Reunion reunion = (Reunion) evenement;
+            return reunion.estParticipant(utilisateur);
+        }
+        
+        // Pour les autres types d'événements, seul le propriétaire est impliqué
+        return false;
     }
 }

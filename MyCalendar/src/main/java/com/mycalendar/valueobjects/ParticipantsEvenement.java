@@ -11,29 +11,40 @@ import java.util.stream.Collectors;
  * Value Object représentant les participants à un événement
  */
 public final class ParticipantsEvenement {
-    private final List<String> participants;
+    private final List<Utilisateur> utilisateurs;
     
     /**
-     * Crée un objet de participants à partir d'une liste de noms
+     * Constructeur privé pour contrôler la création d'instances
      * 
-     * @param participants Liste des noms des participants
+     * @param utilisateurs Liste des utilisateurs participants
      */
-    public ParticipantsEvenement(List<String> participants) {
-        List<String> listeNettoyee = new ArrayList<>();
+    private ParticipantsEvenement(List<Utilisateur> utilisateurs) {
+        List<Utilisateur> listeNettoyee = new ArrayList<>();
         
-        if (participants != null) {
-            for (String participant : participants) {
-                if (participant != null && !participant.trim().isEmpty()) {
-                    listeNettoyee.add(participant.trim());
+        if (utilisateurs != null) {
+            for (Utilisateur utilisateur : utilisateurs) {
+                if (utilisateur != null) {
+                    listeNettoyee.add(utilisateur);
                 }
             }
         }
         
-        this.participants = Collections.unmodifiableList(listeNettoyee);
+        this.utilisateurs = Collections.unmodifiableList(listeNettoyee);
+    }
+    
+    /**
+     * Crée un objet de participants à partir d'une liste d'utilisateurs
+     * 
+     * @param utilisateurs Liste des utilisateurs participants
+     * @return Une nouvelle instance de ParticipantsEvenement
+     */
+    public static ParticipantsEvenement avecUtilisateurs(List<Utilisateur> utilisateurs) {
+        return new ParticipantsEvenement(utilisateurs);
     }
     
     /**
      * Crée un objet de participants à partir d'une chaîne délimitée par des virgules
+     * Cette méthode est pour la rétrocompatibilité
      * 
      * @param chaineParticipants Chaîne au format "nom1, nom2, nom3"
      * @return Une nouvelle instance de ParticipantsEvenement
@@ -44,16 +55,52 @@ public final class ParticipantsEvenement {
         }
         
         String[] noms = chaineParticipants.split(",");
-        return new ParticipantsEvenement(Arrays.asList(noms));
+        List<Utilisateur> utilisateurs = Arrays.stream(noms)
+                .map(String::trim)
+                .filter(nom -> !nom.isEmpty())
+                .map(nom -> new Utilisateur(nom, "—PLACEHOLDER—"))  // Mot de passe placeholder pour rétrocompatibilité
+                .collect(Collectors.toList());
+        
+        return new ParticipantsEvenement(utilisateurs);
     }
     
     /**
-     * Obtient la liste des participants
+     * Obtient la liste des utilisateurs participants
      * 
-     * @return Liste immuable des participants
+     * @return Liste immuable des utilisateurs participants
      */
-    public List<String> getParticipants() {
-        return participants;
+    public List<Utilisateur> getUtilisateurs() {
+        return utilisateurs;
+    }
+    
+    /**
+     * Vérifie si un utilisateur spécifique est participant
+     * 
+     * @param utilisateur L'utilisateur à vérifier
+     * @return true si l'utilisateur est participant, false sinon
+     */
+    public boolean contientUtilisateur(Utilisateur utilisateur) {
+        if (utilisateur == null) {
+            return false;
+        }
+        
+        return utilisateurs.stream()
+                .anyMatch(u -> u.equals(utilisateur));
+    }
+    
+    /**
+     * Vérifie si un utilisateur est participant en utilisant son identifiant
+     * 
+     * @param identifiant L'identifiant de l'utilisateur à vérifier
+     * @return true si un utilisateur avec cet identifiant est participant, false sinon
+     */
+    public boolean contientUtilisateurParIdentifiant(String identifiant) {
+        if (identifiant == null || identifiant.isEmpty()) {
+            return false;
+        }
+        
+        return utilisateurs.stream()
+                .anyMatch(u -> u.getIdentifiant().equals(identifiant));
     }
     
     /**
@@ -62,7 +109,8 @@ public final class ParticipantsEvenement {
      * @return Chaîne au format "nom1, nom2, nom3"
      */
     public String toStringDelimite() {
-        return participants.stream()
+        return utilisateurs.stream()
+                .map(Utilisateur::getIdentifiant)
                 .collect(Collectors.joining(", "));
     }
     
@@ -72,7 +120,7 @@ public final class ParticipantsEvenement {
      * @return true si aucun participant, false sinon
      */
     public boolean estVide() {
-        return participants.isEmpty();
+        return utilisateurs.isEmpty();
     }
     
     /**
@@ -81,7 +129,7 @@ public final class ParticipantsEvenement {
      * @return Nombre de participants
      */
     public int getNombreParticipants() {
-        return participants.size();
+        return utilisateurs.size();
     }
     
     @Override
@@ -89,12 +137,24 @@ public final class ParticipantsEvenement {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ParticipantsEvenement that = (ParticipantsEvenement) o;
-        return Objects.equals(participants, that.participants);
+        
+        if (this.utilisateurs.size() != that.utilisateurs.size()) {
+            return false;
+        }
+        
+        // Vérifier que chaque utilisateur de l'un est dans l'autre
+        for (Utilisateur utilisateur : this.utilisateurs) {
+            if (!that.contientUtilisateur(utilisateur)) {
+                return false;
+            }
+        }
+        
+        return true;
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(participants);
+        return Objects.hash(utilisateurs);
     }
     
     @Override

@@ -3,9 +3,11 @@ package mycalendar.valueobjects;
 import org.junit.jupiter.api.Test;
 
 import com.mycalendar.valueobjects.ParticipantsEvenement;
+import com.mycalendar.valueobjects.Utilisateur;
 
 import org.junit.jupiter.api.DisplayName;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -15,109 +17,148 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ParticipantsEvenementTest {
     
     @Test
-    @DisplayName("La création à partir d'une liste de noms doit fonctionner")
-    void testCreationListeNoms() {
-        List<String> liste = Arrays.asList("Pierre", "Sophie", "Jean");
+    @DisplayName("La création à partir d'une liste d'Utilisateurs doit fonctionner")
+    void testCreationListeUtilisateurs() {
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        Utilisateur sophie = new Utilisateur("Sophie", "Pass123");
+        List<Utilisateur> listeUtilisateurs = Arrays.asList(roger, pierre, sophie);
         
-        ParticipantsEvenement participants = new ParticipantsEvenement(liste);
-        
-        assertEquals(3, participants.getNombreParticipants());
-        assertEquals(liste, participants.getParticipants());
-    }
-    
-    @Test
-    @DisplayName("La création à partir d'une chaîne délimitée doit fonctionner")
-    void testCreationChaineDelimitee() {
-        String chaine = "Pierre, Sophie, Jean";
-        
-        ParticipantsEvenement participants = ParticipantsEvenement.fromString(chaine);
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(listeUtilisateurs);
         
         assertEquals(3, participants.getNombreParticipants());
-        assertEquals("Pierre, Sophie, Jean", participants.toStringDelimite());
+        assertTrue(participants.contientUtilisateur(roger));
+        assertTrue(participants.contientUtilisateur(pierre));
+        assertTrue(participants.contientUtilisateur(sophie));
     }
     
     @Test
     @DisplayName("La création avec une liste vide doit fonctionner")
-    void testCreationListeVide() {
-        ParticipantsEvenement participants = new ParticipantsEvenement(Collections.emptyList());
+    void testCreationListeUtilisateursVide() {
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(Collections.emptyList());
         
         assertTrue(participants.estVide());
         assertEquals(0, participants.getNombreParticipants());
     }
     
     @Test
-    @DisplayName("La création avec une chaîne vide doit fonctionner")
-    void testCreationChaineVide() {
-        ParticipantsEvenement participants = ParticipantsEvenement.fromString("");
+    @DisplayName("La création avec une liste contenant des valeurs null doit les filtrer")
+    void testFiltreUtilisateursNull() {
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        List<Utilisateur> listeAvecNull = new ArrayList<>();
+        listeAvecNull.add(roger);
+        listeAvecNull.add(null);
+        listeAvecNull.add(pierre);
         
-        assertTrue(participants.estVide());
-        assertEquals(0, participants.getNombreParticipants());
-    }
-    
-    @Test
-    @DisplayName("La création avec une liste contenant des valeurs null ou vides doit les filtrer")
-    void testFiltreValeursInvalides() {
-        List<String> liste = Arrays.asList("Pierre", null, "", "  ", "Sophie");
-        
-        ParticipantsEvenement participants = new ParticipantsEvenement(liste);
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(listeAvecNull);
         
         assertEquals(2, participants.getNombreParticipants());
-        assertTrue(participants.getParticipants().contains("Pierre"));
-        assertTrue(participants.getParticipants().contains("Sophie"));
+        assertTrue(participants.contientUtilisateur(roger));
+        assertTrue(participants.contientUtilisateur(pierre));
     }
     
     @Test
-    @DisplayName("Deux instances avec les mêmes participants doivent être égales")
+    @DisplayName("Deux instances avec les mêmes utilisateurs doivent être égales")
     void testEgalite() {
-        ParticipantsEvenement participants1 = new ParticipantsEvenement(Arrays.asList("Pierre", "Sophie"));
-        ParticipantsEvenement participants2 = new ParticipantsEvenement(Arrays.asList("Pierre", "Sophie"));
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        
+        ParticipantsEvenement participants1 = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, pierre));
+        ParticipantsEvenement participants2 = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, pierre));
         
         assertEquals(participants1, participants2);
         assertEquals(participants1.hashCode(), participants2.hashCode());
     }
     
     @Test
-    @DisplayName("Deux instances avec des participants différents ne doivent pas être égales")
+    @DisplayName("Deux instances avec des utilisateurs différents ne doivent pas être égales")
     void testNonEgalite() {
-        ParticipantsEvenement participants1 = new ParticipantsEvenement(Arrays.asList("Pierre", "Sophie"));
-        ParticipantsEvenement participants2 = new ParticipantsEvenement(Arrays.asList("Pierre", "Jean"));
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        Utilisateur sophie = new Utilisateur("Sophie", "Pass123");
+        
+        ParticipantsEvenement participants1 = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, pierre));
+        ParticipantsEvenement participants2 = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, sophie));
         
         assertNotEquals(participants1, participants2);
     }
     
     @Test
-    @DisplayName("La méthode toString doit retourner la liste délimitée")
-    void testToString() {
-        ParticipantsEvenement participants = new ParticipantsEvenement(Arrays.asList("Pierre", "Sophie"));
+    @DisplayName("La méthode getUtilisateurs doit retourner une liste immuable")
+    void testGetUtilisateursImmuable() {
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        List<Utilisateur> liste = new ArrayList<>(Arrays.asList(roger, pierre));
         
-        assertEquals("Pierre, Sophie", participants.toString());
-    }
-    
-    @Test
-    @DisplayName("Les noms des participants doivent être nettoyés des espaces")
-    void testNettoyageEspaces() {
-        List<String> liste = Arrays.asList(" Pierre ", "  Sophie  ");
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(liste);
         
-        ParticipantsEvenement participants = new ParticipantsEvenement(liste);
-        
-        List<String> resultat = participants.getParticipants();
-        assertEquals("Pierre", resultat.get(0));
-        assertEquals("Sophie", resultat.get(1));
-    }
-    
-    @Test
-    @DisplayName("La liste des participants doit être immuable")
-    void testListeImmuable() {
-        List<String> liste = new java.util.ArrayList<>(Arrays.asList("Pierre", "Sophie"));
-        ParticipantsEvenement participants = new ParticipantsEvenement(liste);
-        
-        liste.add("Jean");
+        liste.add(new Utilisateur("Sophie", "Pass123"));
         
         assertEquals(2, participants.getNombreParticipants());
-        assertFalse(participants.getParticipants().contains("Jean"));
         
+        List<Utilisateur> listeRetournee = participants.getUtilisateurs();
         assertThrows(UnsupportedOperationException.class, () -> {
-            participants.getParticipants().add("Michel");
+            listeRetournee.add(new Utilisateur("Sophie", "Pass123"));
         });
+    }
+    
+    @Test
+    @DisplayName("La méthode contientUtilisateur doit détecter correctement la présence d'un utilisateur")
+    void testContientUtilisateur() {
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        Utilisateur sophie = new Utilisateur("Sophie", "Pass123");
+        
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, pierre));
+        
+        assertTrue(participants.contientUtilisateur(roger));
+        assertTrue(participants.contientUtilisateur(pierre));
+        assertFalse(participants.contientUtilisateur(sophie));
+        assertFalse(participants.contientUtilisateur(null));
+        
+        Utilisateur autrePierre = new Utilisateur("Pierre", "AutreMotDePasse");
+        assertTrue(participants.contientUtilisateur(autrePierre));
+    }
+    
+    @Test
+    @DisplayName("La méthode contientUtilisateurParIdentifiant doit fonctionner")
+    void testContientUtilisateurParIdentifiant() {
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, pierre));
+        
+        assertTrue(participants.contientUtilisateurParIdentifiant("Roger"));
+        assertTrue(participants.contientUtilisateurParIdentifiant("Pierre"));
+        assertFalse(participants.contientUtilisateurParIdentifiant("Sophie"));
+        assertFalse(participants.contientUtilisateurParIdentifiant(""));
+        assertFalse(participants.contientUtilisateurParIdentifiant(null));
+    }
+    
+    @Test
+    @DisplayName("La méthode toString doit retourner les identifiants des utilisateurs")
+    void testToString() {
+        Utilisateur roger = new Utilisateur("Roger", "Chat");
+        Utilisateur pierre = new Utilisateur("Pierre", "KiRouhl");
+        
+        ParticipantsEvenement participants = ParticipantsEvenement.avecUtilisateurs(Arrays.asList(roger, pierre));
+        
+        String representation = participants.toString();
+        assertTrue(representation.contains("Roger"));
+        assertTrue(representation.contains("Pierre"));
+    }
+    
+    @Test
+    @DisplayName("La rétrocompatibilité avec les chaînes de caractères doit fonctionner")
+    void testCompatibiliteChainesDeCaracteres() {
+        String chaine = "Roger, Pierre, Sophie";
+        
+        ParticipantsEvenement participants = ParticipantsEvenement.fromString(chaine);
+        
+        assertEquals(3, participants.getNombreParticipants());
+        assertTrue(participants.contientUtilisateurParIdentifiant("Roger"));
+        assertTrue(participants.contientUtilisateurParIdentifiant("Pierre"));
+        assertTrue(participants.contientUtilisateurParIdentifiant("Sophie"));
     }
 }

@@ -165,7 +165,6 @@ public class EvenementTest {
             FrequenceEvenement.quotidienne()
         );
         
-        // When & Then
         assertFalse(rdv.estEnConflitAvec(periodique));
         assertFalse(periodique.estEnConflitAvec(rdv));
     }
