@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Scanner;
 
+import com.mycalendar.evenements.Evenement;
+
 public class Main {
     public static void main(String[] args) {
         CalendarManager calendar = new CalendarManager();
@@ -253,12 +255,12 @@ public class Main {
         }
     }
 
-    private static void afficherListe(List<Event> evenements) {
+    private static void afficherListe(List<Evenement> evenements) {
         if (evenements.isEmpty()) {
             System.out.println("Aucun événement trouvé pour cette période.");
         } else {
             System.out.println("Événements trouvés : ");
-            for (Event e : evenements) {
+            for (Evenement e : evenements) {
                 System.out.println("- " + e.description());
             }
         }

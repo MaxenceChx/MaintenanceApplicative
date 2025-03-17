@@ -1,58 +1,173 @@
 package com.mycalendar;
 
+import com.mycalendar.evenements.*;
+import com.mycalendar.valueobjects.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+/**
+ * Gestionnaire de calendrier utilisant du polymorphisme pour le comportement variant
+ */
 public class CalendarManager {
-    public List<Event> events;
+    private final List<Evenement> evenements;
 
+    /**
+     * Constructeur du gestionnaire de calendrier
+     */
     public CalendarManager() {
-        this.events = new ArrayList<>();
+        this.evenements = new ArrayList<>();
     }
 
-    public void ajouterEvent(String type, String title, String proprietaire, LocalDateTime dateDebut, int dureeMinutes,
-                             String lieu, String participants, int frequenceJours) {
-        Event e = new Event(type, title, proprietaire, dateDebut, dureeMinutes, lieu, participants, frequenceJours);
-        events.add(e);
+    /**
+     * Ajoute un événement au calendrier
+     * 
+     * @param evenement L'événement à ajouter
+     */
+    public void ajouterEvenement(Evenement evenement) {
+        evenements.add(evenement);
+    }
+    
+    /**
+     * Ajoute un rendez-vous personnel au calendrier
+     * 
+     * @param titre Titre du rendez-vous
+     * @param proprietaire Propriétaire du rendez-vous
+     * @param date Date du rendez-vous
+     * @param heureDebut Heure de début
+     * @param duree Durée du rendez-vous
+     */
+    public void ajouterRendezVousPersonnel(TitreEvenement titre, Utilisateur proprietaire, 
+                                         DateEvenement date, HeureDebut heureDebut, DureeEvenement duree) {
+        RendezVousPersonnel rdv = new RendezVousPersonnel(titre, proprietaire, date, heureDebut, duree);
+        ajouterEvenement(rdv);
+    }
+    
+    /**
+     * Ajoute une réunion au calendrier
+     * 
+     * @param titre Titre de la réunion
+     * @param proprietaire Propriétaire de la réunion
+     * @param date Date de la réunion
+     * @param heureDebut Heure de début
+     * @param duree Durée de la réunion
+     * @param lieu Lieu de la réunion
+     * @param participants Participants à la réunion
+     */
+    public void ajouterReunion(TitreEvenement titre, Utilisateur proprietaire, 
+                             DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
+                             LieuEvenement lieu, ParticipantsEvenement participants) {
+        Reunion reunion = new Reunion(titre, proprietaire, date, heureDebut, duree, lieu, participants);
+        ajouterEvenement(reunion);
+    }
+    
+    /**
+     * Ajoute un événement périodique au calendrier
+     * 
+     * @param titre Titre de l'événement
+     * @param proprietaire Propriétaire de l'événement
+     * @param date Date de première occurrence
+     * @param heureDebut Heure de début
+     * @param frequence Fréquence de répétition
+     */
+    public void ajouterEvenementPeriodique(TitreEvenement titre, Utilisateur proprietaire, 
+                                         DateEvenement date, HeureDebut heureDebut, FrequenceEvenement frequence) {
+        EvenementPeriodique evenement = new EvenementPeriodique(titre, proprietaire, date, heureDebut, frequence);
+        ajouterEvenement(evenement);
+    }
+    
+    /**
+     * Méthode de compatibilité pour ajouter un événement au calendrier
+     * 
+     * @param typeStr Type d'événement (chaîne)
+     * @param title Titre de l'événement
+     * @param proprietaire Utilisateur propriétaire (déjà authentifié)
+     * @param dateDebut Date et heure de début
+     * @param dureeMinutes Durée en minutes
+     * @param lieu Lieu de l'événement
+     * @param participants Participants séparés par des virgules
+     * @param frequenceJours Fréquence en jours
+     */
+    public void ajouterEvent(String typeStr, String title, Utilisateur proprietaire, LocalDateTime dateDebut, int dureeMinutes,
+                           String lieu, String participants, int frequenceJours) {
+        Evenement evenement = EvenementFactory.creerEvenement(
+            typeStr, title, proprietaire, dateDebut, dureeMinutes, lieu, participants, frequenceJours
+        );
+        ajouterEvenement(evenement);
+    }
+    
+    /**
+     * Méthode de compatibilité pour ajouter un événement au calendrier
+     * 
+     * @param typeStr Type d'événement (chaîne)
+     * @param title Titre de l'événement
+     * @param proprietaireStr Identifiant du propriétaire (chaîne)
+     * @param dateDebut Date et heure de début
+     * @param dureeMinutes Durée en minutes
+     * @param lieu Lieu de l'événement
+     * @param participants Participants séparés par des virgules
+     * @param frequenceJours Fréquence en jours
+     */
+    public void ajouterEvent(String typeStr, String title, String proprietaireStr, LocalDateTime dateDebut, int dureeMinutes,
+                            String lieu, String participants, int frequenceJours) {
+        Evenement evenement = EvenementFactory.creerEvenement(
+            typeStr, title, proprietaireStr, dateDebut, dureeMinutes, lieu, participants, frequenceJours
+        );
+        ajouterEvenement(evenement);
     }
 
-    public List<Event> eventsDansPeriode(LocalDateTime debut, LocalDateTime fin) {
-        List<Event> result = new ArrayList<>();
-        for (Event e : events) {
-            if (e.type.equals("PERIODIQUE")) {
-                LocalDateTime temp = e.dateDebut;
-                while (temp.isBefore(fin)) {
-                    if (!temp.isBefore(debut)) {
-                        result.add(e);
-                        break;
-                    }
-                    temp = temp.plusDays(e.frequenceJours);
-                }
-            } else if (!e.dateDebut.isBefore(debut) && !e.dateDebut.isAfter(fin)) {
-                result.add(e);
-            }
-        }
-        return result;
+    /**
+     * Trouve les événements dans une période donnée
+     * 
+     * @param debut Début de la période
+     * @param fin Fin de la période
+     * @return Liste des événements dans la période
+     */
+    public List<Evenement> eventsDansPeriode(LocalDateTime debut, LocalDateTime fin) {
+        return evenements.stream()
+                .filter(e -> e.aLieuPendant(debut, fin))
+                .collect(Collectors.toList());
     }
 
-    public boolean conflit(Event e1, Event e2) {
-        LocalDateTime fin1 = e1.dateDebut.plusMinutes(e1.dureeMinutes);
-        LocalDateTime fin2 = e2.dateDebut.plusMinutes(e2.dureeMinutes);
-
-        if (e1.type.equals("PERIODIQUE") || e2.type.equals("PERIODIQUE")) {
-            return false; // Simplification abusive
-        }
-
-        if (e1.dateDebut.isBefore(fin2) && fin1.isAfter(e2.dateDebut)) {
-            return true;
-        }
-        return false;
+    /**
+     * Vérifie s'il y a un conflit entre deux événements
+     * 
+     * @param e1 Premier événement
+     * @param e2 Second événement
+     * @return true s'il y a conflit, false sinon
+     */
+    public boolean conflit(Evenement e1, Evenement e2) {
+        return e1.estEnConflitAvec(e2);
     }
 
+    /**
+     * Affiche tous les événements du calendrier
+     */
     public void afficherEvenements() {
-        for (Event e : events) {
+        for (Evenement e : evenements) {
             System.out.println(e.description());
         }
+    }
+    
+    /**
+     * Obtient la liste des événements
+     * 
+     * @return Liste des événements
+     */
+    public List<Evenement> getEvenements() {
+        return new ArrayList<>(evenements);
+    }
+    
+    /**
+     * Filtre les événements par propriétaire
+     * 
+     * @param utilisateur Utilisateur propriétaire des événements à rechercher
+     * @return Liste des événements appartenant à l'utilisateur
+     */
+    public List<Evenement> evenementsDeLUtilisateur(Utilisateur utilisateur) {
+        return evenements.stream()
+                .filter(e -> e.getProprietaire().equals(utilisateur))
+                .collect(Collectors.toList());
     }
 }
