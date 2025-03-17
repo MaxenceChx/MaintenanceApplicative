@@ -1,4 +1,4 @@
-package mycalendar;
+package mycalendar.valueobjects;
 
 import org.junit.jupiter.api.Test;
 
