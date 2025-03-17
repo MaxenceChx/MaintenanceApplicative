@@ -5,9 +5,11 @@ import com.mycalendar.menu.afficher.AfficherEvenementsAction;
 import com.mycalendar.menu.ajouter.AjouterEvenementPeriodiqueAction;
 import com.mycalendar.menu.ajouter.AjouterRendezVousPersonnelAction;
 import com.mycalendar.menu.ajouter.AjouterReunionAction;
+import com.mycalendar.menu.ajouter.AjouterTacheAction;
 import com.mycalendar.menu.compte.ConnexionAction;
 import com.mycalendar.menu.compte.CreationCompteAction;
 import com.mycalendar.menu.compte.DeconnexionAction;
+import com.mycalendar.menu.supprimer.SupprimerEvenementAction;
 
 import java.util.Scanner;
 
@@ -79,6 +81,8 @@ public class Main {
         registry.ajouterAction(new AjouterRendezVousPersonnelAction());
         registry.ajouterAction(new AjouterReunionAction());
         registry.ajouterAction(new AjouterEvenementPeriodiqueAction());
+        registry.ajouterAction(new AjouterTacheAction());
+        registry.ajouterAction(new SupprimerEvenementAction());
         registry.ajouterAction(new DeconnexionAction());
         return registry;
     }

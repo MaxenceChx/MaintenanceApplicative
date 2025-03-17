@@ -7,8 +7,9 @@ package com.mycalendar.valueobjects;
 public enum TypeEvenement {
     RDV_PERSONNEL("RDV_PERSONNEL", "Rendez-vous personnel", false, false, false),
     REUNION("REUNION", "Réunion", true, true, false),
-    PERIODIQUE("PERIODIQUE", "Événement périodique", false, false, true);
-    
+    PERIODIQUE("PERIODIQUE", "Événement périodique", false, false, true),
+    TACHE("TACHE", "Tâche", false, false, false);
+
     private final String code;
     private final String libelle;
     private final boolean necessiteLieu;

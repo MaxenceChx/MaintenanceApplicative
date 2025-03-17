@@ -77,6 +77,23 @@ public class CalendarManager {
         EvenementPeriodique evenement = new EvenementPeriodique(titre, proprietaire, date, heureDebut, frequence);
         ajouterEvenement(evenement);
     }
+
+    /**
+     * Ajoute une tâche au calendrier
+     * 
+     * @param titre Titre de la tâche
+     * @param proprietaire Propriétaire de la tâche
+     * @param date Date de la tâche
+     * @param heureDebut Heure de début
+     * @param duree Durée estimée de la tâche
+     * @param priorite Priorité de la tâche
+     */
+    public void ajouterTache(TitreEvenement titre, Utilisateur proprietaire, 
+        DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
+        PrioriteTache priorite) {
+        Tache tache = new Tache(titre, proprietaire, date, heureDebut, duree, priorite);
+        ajouterEvenement(tache);
+    }
     
     /**
      * Supprime un événement par son identifiant

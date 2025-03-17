@@ -35,6 +35,18 @@ public class TypeEvenementTest {
         assertEquals("PERIODIQUE", type.getCode());
         assertEquals("Événement périodique", type.getLibelle());
     }
+
+    @Test
+    @DisplayName("La création d'un type TACHE doit fonctionner")
+    void testCreationTache() {
+        TypeEvenement type = TypeEvenement.TACHE;
+        
+        assertEquals("TACHE", type.getCode());
+        assertEquals("Tâche", type.getLibelle());
+        assertFalse(type.necessiteLieu());
+        assertFalse(type.necessiteParticipants());
+        assertFalse(type.estPeriodique());
+    }
     
     @Test
     @DisplayName("La méthode fromString doit retourner le bon type")
