@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.mycalendar.gui.AddPeriodiqueDialogController"
+          vgap="10" hgap="10" stylesheets="@../css/styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- En-tête -->
+    <Label text="Ajouter un événement périodique" styleClass="dialog-title" 
+           GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"/>
+    
+    <!-- Champs de saisie -->
+    <Label text="Titre:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <TextField fx:id="titleField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    
+    <Label text="Date de première occurrence:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <DatePicker fx:id="datePicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    
+    <Label text="Heure:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
+        <ComboBox fx:id="hourComboBox" prefWidth="80"/>
+        <Label text="h"/>
+        <ComboBox fx:id="minuteComboBox" prefWidth="80"/>
+    </HBox>
+    
+    <Label text="Fréquence:" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+    <ComboBox fx:id="frequenceComboBox" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+    
+    <Label text="Personnalisée (jours):" GridPane.columnIndex="0" GridPane.rowIndex="5"/>
+    <Spinner fx:id="frequenceJoursSpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
+    
+    <!-- Boutons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.columnIndex="0" 
+          GridPane.rowIndex="6" GridPane.columnSpan="2">
+        <Button text="Annuler" onAction="#handleCancel"/>
+        <Button text="Ajouter" onAction="#handleAdd" defaultButton="true"/>
+    </HBox>
+    
+    <!-- Message d'erreur -->
+    <Label fx:id="errorLabel" styleClass="error-label" visible="false"
+           GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2"/>
+    
+</GridPane>

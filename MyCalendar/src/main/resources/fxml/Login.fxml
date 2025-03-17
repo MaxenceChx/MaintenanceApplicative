@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycalendar.gui.LoginController"
+      spacing="20"
+      alignment="CENTER"
+      stylesheets="@../css/styles.css"
+      prefHeight="400" prefWidth="600">
+    
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    
+    <Label styleClass="title-label" text="Gestionnaire de Calendrier" />
+    
+    <HBox alignment="CENTER">
+        <VBox spacing="10" alignment="CENTER" maxWidth="300">
+            <Label text="Connexion" styleClass="subtitle-label"/>
+            
+            <TextField fx:id="usernameField" promptText="Nom d'utilisateur"/>
+            <PasswordField fx:id="passwordField" promptText="Mot de passe"/>
+            
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="loginButton" text="Se connecter" onAction="#handleLogin"/>
+                <Button fx:id="createAccountButton" text="Créer un compte" onAction="#handleCreateAccount"/>
+            </HBox>
+            
+            <Label fx:id="errorLabel" styleClass="error-label" visible="false"/>
+        </VBox>
+    </HBox>
+</VBox>

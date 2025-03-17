@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.mycalendar.gui.CreateAccountController"
+      spacing="20"
+      alignment="CENTER"
+      stylesheets="@../css/styles.css"
+      prefHeight="400" prefWidth="600">
+    
+    <padding>
+        <Insets top="40" right="40" bottom="40" left="40"/>
+    </padding>
+    
+    <Label styleClass="title-label" text="Gestionnaire de Calendrier" />
+    
+    <HBox alignment="CENTER">
+        <VBox spacing="10" alignment="CENTER" maxWidth="300">
+            <Label text="Création de compte" styleClass="subtitle-label"/>
+            
+            <TextField fx:id="usernameField" promptText="Nom d'utilisateur"/>
+            <PasswordField fx:id="passwordField" promptText="Mot de passe"/>
+            <PasswordField fx:id="confirmPasswordField" promptText="Confirmer le mot de passe"/>
+            
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="createButton" text="Créer le compte" onAction="#handleCreate"/>
+                <Button fx:id="cancelButton" text="Annuler" onAction="#handleCancel"/>
+            </HBox>
+            
+            <Label fx:id="errorLabel" styleClass="error-label" visible="false"/>
+        </VBox>
+    </HBox>
+</VBox>

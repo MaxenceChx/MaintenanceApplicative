@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.mycalendar.gui.MainViewController"
+            stylesheets="@../css/styles.css">
+    
+    <top>
+        <VBox>
+            <!-- En-tête -->
+            <HBox styleClass="header" alignment="CENTER_LEFT" spacing="20">
+                <padding>
+                    <Insets top="10" right="20" bottom="10" left="20"/>
+                </padding>
+                
+                <Label fx:id="welcomeLabel" styleClass="header-label" />
+                <Pane HBox.hgrow="ALWAYS" />
+                <Button fx:id="logoutButton" text="Déconnexion" onAction="#handleLogout"/>
+            </HBox>
+            
+            <!-- Menu des actions -->
+            <HBox styleClass="toolbar" alignment="CENTER_LEFT" spacing="10">
+                <padding>
+                    <Insets top="5" right="20" bottom="5" left="20"/>
+                </padding>
+                
+                <Button text="Ajouter RDV" onAction="#handleAddRendezVous"/>
+                <Button text="Ajouter Réunion" onAction="#handleAddReunion"/>
+                <Button text="Ajouter Événement Périodique" onAction="#handleAddPeriodique"/>
+                <Button text="Ajouter Tâche" onAction="#handleAddTache"/>
+                <Separator orientation="VERTICAL"/>
+                <Button text="Supprimer Événement" onAction="#handleDeleteEvent"/>
+            </HBox>
+            
+            <!-- Filtres de date -->
+            <HBox styleClass="date-filter" alignment="CENTER_LEFT" spacing="10">
+                <padding>
+                    <Insets top="5" right="20" bottom="5" left="20"/>
+                </padding>
+                
+                <Label text="Afficher: "/>
+
+                <fx:define>
+                    <ToggleGroup fx:id="viewToggle"/>
+                </fx:define>
+
+                <RadioButton fx:id="allEventsRadio" text="Tous" toggleGroup="$viewToggle" selected="true" />
+                <RadioButton fx:id="todayEventsRadio" text="Aujourd'hui" toggleGroup="$viewToggle" />
+                <RadioButton fx:id="weekEventsRadio" text="Cette semaine" toggleGroup="$viewToggle" />
+                <RadioButton fx:id="monthEventsRadio" text="Ce mois" toggleGroup="$viewToggle" />
+            </HBox>
+        </VBox>
+    </top>
+    
+    <center>
+        <TableView fx:id="eventsTable">
+            <columns>
+                <TableColumn fx:id="typeColumn" text="Type" />
+                <TableColumn fx:id="titleColumn" text="Titre" />
+                <TableColumn fx:id="dateColumn" text="Date" />
+                <TableColumn fx:id="timeColumn" text="Heure" />
+                <TableColumn fx:id="durationColumn" text="Durée" />
+                <TableColumn fx:id="locationColumn" text="Lieu" />
+                <TableColumn fx:id="detailsColumn" text="Détails" />
+            </columns>
+        </TableView>
+    </center>
+    
+    <bottom>
+        <HBox styleClass="status-bar" alignment="CENTER_LEFT">
+            <padding>
+                <Insets top="5" right="10" bottom="5" left="10"/>
+            </padding>
+            <Label fx:id="statusLabel" text="Prêt" />
+        </HBox>
+    </bottom>
+    
+</BorderPane>

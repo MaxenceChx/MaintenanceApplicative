@@ -89,8 +89,8 @@ public class CalendarManager {
      * @param priorite Priorité de la tâche
      */
     public void ajouterTache(TitreEvenement titre, Utilisateur proprietaire, 
-        DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
-        PrioriteTache priorite) {
+                            DateEvenement date, HeureDebut heureDebut, DureeEvenement duree,
+                            PrioriteTache priorite) {
         Tache tache = new Tache(titre, proprietaire, date, heureDebut, duree, priorite);
         ajouterEvenement(tache);
     }

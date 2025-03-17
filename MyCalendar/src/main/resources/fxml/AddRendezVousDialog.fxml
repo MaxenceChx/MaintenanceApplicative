@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
+<GridPane xmlns="http://javafx.com/javafx"
+          xmlns:fx="http://javafx.com/fxml"
+          fx:controller="com.mycalendar.gui.AddRendezVousDialogController"
+          vgap="10" hgap="10" stylesheets="@../css/styles.css">
+    
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+    
+    <!-- En-tête -->
+    <Label text="Ajouter un rendez-vous personnel" styleClass="dialog-title" 
+           GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.columnSpan="2"/>
+    
+    <!-- Champs de saisie -->
+    <Label text="Titre:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+    <TextField fx:id="titleField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+    
+    <Label text="Date:" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+    <DatePicker fx:id="datePicker" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+    
+    <Label text="Heure:" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+    <HBox spacing="10" GridPane.columnIndex="1" GridPane.rowIndex="3">
+        <ComboBox fx:id="hourComboBox" prefWidth="80"/>
+        <Label text="h"/>
+        <ComboBox fx:id="minuteComboBox" prefWidth="80"/>
+    </HBox>
+    
+    <Label text="Durée (minutes):" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+    <Spinner fx:id="durationSpinner" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
+    
+    <!-- Boutons -->
+    <HBox spacing="10" alignment="CENTER_RIGHT" GridPane.columnIndex="0" 
+          GridPane.rowIndex="5" GridPane.columnSpan="2">
+        <Button text="Annuler" onAction="#handleCancel"/>
+        <Button text="Ajouter" onAction="#handleAdd" defaultButton="true"/>
+    </HBox>
+    
+    <!-- Message d'erreur -->
+    <Label fx:id="errorLabel" styleClass="error-label" visible="false"
+           GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.columnSpan="2"/>
+    
+</GridPane>
